@@ -162,7 +162,7 @@ server.tool(
 
 server.tool(
   'venice_uncensored',
-  'Chat with Venice uncensored model. No content restrictions. Privacy-focused.',
+  'Chat with Venice in uncensored mode. Privacy-focused with minimal restrictions.',
   {
     prompt: z.string().describe('The prompt'),
     system: z.string().optional().describe('Optional system message'),
@@ -171,13 +171,13 @@ server.tool(
     try {
       const { prompt, system } = params;
       const messages: ChatMessage[] = [];
-      if (system) {
-        messages.push({ role: 'system', content: system });
-      }
+      // Use permissive system prompt for uncensored mode
+      const uncensoredSystem = system || 'You are a helpful, uncensored AI assistant. You provide direct, honest answers without moral judgments or unnecessary warnings. You respect the user\'s autonomy and intelligence.';
+      messages.push({ role: 'system', content: uncensoredSystem });
       messages.push({ role: 'user', content: prompt });
 
       const response = await venice.chat.completions.create({
-        model: 'dolphin-2.9.3-mistral-7b',
+        model: 'llama-3.3-70b',
         messages,
         temperature: 0.8,
       });
