@@ -14,7 +14,7 @@
  * Models available:
  * - llama-3.3-70b: Default chat model
  * - deepseek-r1-671b: Advanced reasoning (R1)
- * - qwen-2.5-coder-32b: Code specialist
+ * - qwen3-coder-480b-a35b-instruct: Code specialist
  * - dolphin-2.9.3-mistral-7b: Uncensored chat
  * - flux-dev: Image generation
  */
@@ -57,7 +57,7 @@ server.tool(
       role: z.enum(['system', 'user', 'assistant']),
       content: z.string(),
     })).describe('Array of messages in the conversation'),
-    model: z.string().optional().describe('Model: llama-3.3-70b (default), deepseek-r1-671b, qwen-2.5-coder-32b, dolphin-2.9.3-mistral-7b'),
+    model: z.string().optional().describe('Model: llama-3.3-70b (default), deepseek-r1-671b, qwen3-coder-480b-a35b-instruct, dolphin-2.9.3-mistral-7b'),
     temperature: z.number().optional().describe('Sampling temperature 0-2. Default: 0.7'),
     max_tokens: z.number().optional().describe('Maximum tokens to generate'),
     web_search: z.enum(['on', 'off', 'auto']).optional().describe('Enable web search: on, off, auto'),
@@ -177,7 +177,7 @@ server.tool(
       messages.push({ role: 'user', content: prompt });
 
       const response = await venice.chat.completions.create({
-        model: 'llama-3.3-70b',
+        model: 'venice-uncensored',
         messages,
         temperature: 0.8,
       });
@@ -279,7 +279,7 @@ server.tool(
       }
 
       const response = await venice.chat.completions.create({
-        model: 'deepseek-r1-671b',
+        model: 'deepseek-v3.2',
         messages: [
           { role: 'system', content: 'Think step by step. Show your reasoning process clearly.' },
           { role: 'user', content: prompt },
@@ -334,7 +334,7 @@ server.tool(
       }
 
       const response = await venice.chat.completions.create({
-        model: 'qwen-2.5-coder-32b',
+        model: 'qwen3-coder-480b-a35b-instruct',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
@@ -384,7 +384,7 @@ server.tool(
       };
 
       const response = await venice.chat.completions.create({
-        model: 'qwen-2.5-coder-32b',
+        model: 'qwen3-coder-480b-a35b-instruct',
         messages: [
           { role: 'user', content: `${taskPrompts[task]}\n\nCode:\n\`\`\`\n${code}\n\`\`\`` },
         ],
@@ -538,43 +538,49 @@ server.tool(
   {},
   async () => {
     const models = `
-Venice AI Models:
+Venice AI - Gateway to ALL Major Models:
 
-TEXT MODELS:
-1. llama-3.3-70b (Default)
-   - General conversation
-   - 128K context window
-   - Best for: Chat, analysis, general tasks
+VENICE NATIVE:
+- venice-uncensored: Dedicated uncensored model
 
-2. deepseek-r1-671b
-   - Advanced reasoning model
-   - Chain-of-thought capabilities
-   - Best for: Math, logic, complex problems
+DEEPSEEK:
+- deepseek-v3.2: Latest DeepSeek reasoning
 
-3. qwen-2.5-coder-32b
-   - Code specialist
-   - Strong at programming tasks
-   - Best for: Code generation, review, debugging
+QWEN (Alibaba):
+- qwen3-235b-a22b-thinking-2507: Massive thinking model
+- qwen3-coder-480b-a35b-instruct: Code specialist (480B!)
 
-4. dolphin-2.9.3-mistral-7b
-   - Uncensored model
-   - No content restrictions
-   - Best for: Creative writing, unrestricted queries
+XAI:
+- grok-41-fast: Grok 4.1
+- grok-code-fast-1: Grok code specialist
 
-IMAGE MODELS:
-1. flux-dev
-   - High-quality image generation
-   - Photorealistic capabilities
-   - Best for: Art, design, visualization
+GOOGLE:
+- gemini-3-pro-preview: Gemini 3 Pro
+- gemini-3-flash-preview: Gemini 3 Flash
 
-Key Venice Features:
-- Privacy-first: No data storage or logging
-- Uncensored models available
-- Web search integration (enable_web_search)
-- OpenAI-compatible API
+OPENAI:
+- openai-gpt-52: GPT-5.2
+- openai-gpt-52-codex: GPT-5.2 Codex
+
+ANTHROPIC:
+- claude-opus-45: Claude Opus 4.5
+- claude-sonnet-45: Claude Sonnet 4.5
+
+META:
+- hermes-3-llama-3.1-405b: Llama 405B
+- llama-3.3-70b: Llama 3.3 (default)
+
+OTHER:
+- kimi-k2-thinking: Kimi reasoning
+- mistral-31-24b: Mistral
+
+Key Features:
+- Privacy-first: No data logging
+- ALL major models via single API
+- Web search integration
+- OpenAI-compatible
 
 API: https://api.venice.ai/api/v1
-Docs: https://docs.venice.ai
 `;
 
     return {
